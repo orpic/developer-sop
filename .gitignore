@@ -1,0 +1,43 @@
+# Data from a running install
+backups/
+import/*
+!import/.gitkeep
+*.archive
+*.archive.gz
+*.dump
+*.bson
+*.bson.gz
+
+# Certificates and keys
+certs/
+*.pem
+*.key
+*.crt
+*.p12
+
+# Settings and secrets
+.env
+.env.*
+!.env.example
+*.local.json
+config.local.*
+
+# Dependencies and builds
+node_modules/
+npm-debug.log*
+
+# Logs
+*.log
+
+# Backups of edited files
+*.bak
+*.orig
+*.rej
+*~
+*.swp
+
+# OS and editor files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

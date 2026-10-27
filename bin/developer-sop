@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+# Development SOPs store. Stack: docker-compose.yml next to bin/.
+set -euo pipefail
+SELF="$0"
+while [ -h "$SELF" ]; do
+  LINK=$(readlink "$SELF")
+  case "$LINK" in /*) SELF="$LINK" ;; *) SELF="$(dirname "$SELF")/$LINK" ;; esac
+done
+HOME_DIR="$(cd "$(dirname "$SELF")/.." && pwd)"
+NODE=$(command -v node || ls "$HOME"/.nvm/versions/node/*/bin/node 2>/dev/null | tail -1)
+case "${1:-}" in
+  up)     docker compose -f "$HOME_DIR/docker-compose.yml" up -d --build; echo "page: http://localhost:8028" ;;
+  down)   docker compose -f "$HOME_DIR/docker-compose.yml" down ;;
+  sh)     shift; docker exec -it developer-sop-mongo mongosh developer-sop "$@" ;;
+  eval)   shift; docker exec developer-sop-mongo mongosh developer-sop --quiet --eval "$1" ;;
+  backup)
+    stamp=$(date -u +%Y%m%dT%H%M%SZ)
+    docker exec developer-sop-mongo mongodump --db developer-sop --archive="/backups/developer-sop-$stamp.archive.gz" --gzip --quiet
+    ls -1t "$HOME_DIR"/backups/developer-sop-*.archive.gz | tail -n +15 | xargs -r rm --
+    echo "backup: $HOME_DIR/backups/developer-sop-$stamp.archive.gz" ;;
+  restore)
+    [ -f "${2:-}" ] || { echo "usage: developer-sop restore <archive in backups/>"; exit 1; }
+    docker exec developer-sop-mongo mongorestore --archive="/backups/$(basename "$2")" --gzip --drop --quiet ;;
+  *)      exec "$NODE" "$HOME_DIR/tools/developer-sop.mjs" "$@" ;;
+esac

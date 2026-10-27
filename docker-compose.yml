@@ -1,0 +1,34 @@
+name: developer-sop
+services:
+  mongo:
+    image: mongo:8.0
+    container_name: developer-sop-mongo
+    ports: ["127.0.0.1:27027:27017"]
+    volumes:
+      - developer-sop-data:/data/db
+      - ./init:/docker-entrypoint-initdb.d:ro
+      - ./backups:/backups
+    restart: unless-stopped
+  ui:
+    image: mongo-express:1.0
+    container_name: developer-sop-ui
+    ports: ["127.0.0.1:8027:8081"]
+    environment:
+      ME_CONFIG_MONGODB_URL: "mongodb://mongo:27017"
+      ME_CONFIG_BASICAUTH: "false"
+    depends_on: [mongo]
+    restart: unless-stopped
+  page:
+    build: ./page
+    container_name: developer-sop-page
+    ports: ["127.0.0.1:8028:8028"]
+    environment:
+      MONGO_URL: "mongodb://mongo:27017/developer-sop"
+      OWNER_NAME: "${OWNER_NAME:-the owner}"
+      REPO_URL: "${REPO_URL:-}"
+      LOCAL_REPO: "${LOCAL_REPO:-}"
+    depends_on: [mongo]
+    restart: unless-stopped
+volumes:
+  developer-sop-data:
+    name: developer-sop-data

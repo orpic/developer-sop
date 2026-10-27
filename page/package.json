@@ -1,0 +1,6 @@
+{
+  "name": "developer-sop-page",
+  "private": true,
+  "type": "module",
+  "dependencies": { "mongodb": "6.10.0", "marked": "14.1.3" }
+}

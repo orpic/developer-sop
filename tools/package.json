@@ -1,0 +1,1 @@
+{ "name": "developer-sop-tools", "private": true, "type": "module", "dependencies": { "mongodb": "6.10.0" } }
